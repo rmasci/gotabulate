@@ -3,7 +3,6 @@ package gotabulate
 import "fmt"
 import "bytes"
 import "github.com/mattn/go-runewidth"
-import "unicode/utf8"
 import "math"
 
 // Basic Structure of TableFormat
@@ -14,7 +13,6 @@ type TableFormat struct {
 	LineBottom      Line
 	HeaderRow       Row
 	DataRow         Row
-	TitleRow        Row
 	Padding         int
 	HeaderHide      bool
 	FitScreen       bool
@@ -35,6 +33,34 @@ type Row struct {
 	end   string
 }
 
+var html string = `<!DOCTYPE html>
+<html>
+<div class="tabulate">
+<style type="text/css">
+#tabulate {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    width: 100%;
+    border-collapse: collapse;
+}
+#tabulate td, #tabulate th {
+    font-size: 1em;
+    border: 1px solid #000000;
+    padding: 3px 7px 2px 7px;
+}
+#tabulate th {
+    text-align: left;
+    padding-top: 5px;
+    padding-bottom: 4px;
+    background-color: #C0C0C0;
+    color: #000000;
+}
+#tabulate tr.alt td {
+    color: #000000;
+    background-color: #EAF2D3;
+}
+</style>
+</div>`
+
 // Table Formats that are available to the user
 // The user can define his own format, just by addind an entry to this map
 // and calling it with Render function e.g t.Render("customFormat")
@@ -45,23 +71,129 @@ var TableFormats = map[string]TableFormat{
 		LineBottom:      Line{"", "-", "  ", ""},
 		HeaderRow:       Row{"", "  ", ""},
 		DataRow:         Row{"", "  ", ""},
-		TitleRow:        Row{"", "  ", ""},
 		Padding:         1,
 	},
 	"plain": TableFormat{
 		HeaderRow: Row{"", "  ", ""},
 		DataRow:   Row{"", "  ", ""},
-		TitleRow:  Row{"", "  ", ""},
 		Padding:   1,
 	},
+	"tab": TableFormat{
+		HeaderRow: Row{"", "	", ""},
+		DataRow:   Row{"", "	", ""},
+		Padding:   1,
+	},
+
+	"csv": TableFormat{
+		HeaderRow: Row{"", ",", ""},
+		DataRow:   Row{"", ",", ""},
+		Padding:   0,
+	},
+	"html": TableFormat{
+		LineTop:    Line{html, "", "", "<table id=\"tabulate\"><tr>"},
+		LineBottom: Line{"</tr>", "", "", "</table>"},
+		HeaderRow:  Row{"<th>", "</th><th>", "</th></tr>"},
+		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
+		Padding:    0,
+	},
+
+	"mysqlt": TableFormat{
+		LineTop:         Line{"+", "-", "+", "+"},
+		LineBelowHeader: Line{"+", "=", "+", "+"},
+		//LineBetweenRows: Line{"|", " ", "|", "|"},
+		LineBottom: Line{"+", "-", "+", "+"},
+		HeaderRow:  Row{"|", "|", "|"},
+		DataRow:    Row{"|", "|", "|"},
+		Padding:    1,
+	},
+	"mysql": TableFormat{
+		LineTop:         Line{"╒", "═", "╤", "╕"},
+		LineBelowHeader: Line{"╞", "═", "╪", "╡"},
+		//LineBetweenRows: Line{"│", "─", "┼", "│"},
+		LineBottom:      Line{"└", "─", "┴", "┘"},
+		HeaderRow:       Row{"│", "│", "│"},
+		DataRow:         Row{"│", "│", "│"},
+		Padding:         1,
+	},
 	"grid": TableFormat{
+		LineTop:         Line{"╒", "═", "╤", "╕"},
+		LineBelowHeader: Line{"╞", "═", "╪", "╡"},
+		LineBetweenRows: Line{"│", "─", "┼", "│"},
+		LineBottom:      Line{"└", "─", "┴", "┘"},
+		HeaderRow:       Row{"│", "│", "│"},
+		DataRow:         Row{"│", "│", "│"},
+		Padding:         1,
+	},
+	"gridt": TableFormat{
 		LineTop:         Line{"+", "-", "+", "+"},
 		LineBelowHeader: Line{"+", "=", "+", "+"},
 		LineBetweenRows: Line{"+", "-", "+", "+"},
 		LineBottom:      Line{"+", "-", "+", "+"},
 		HeaderRow:       Row{"|", "|", "|"},
 		DataRow:         Row{"|", "|", "|"},
-		TitleRow:        Row{"|", " ", "|"},
+		Padding:         1,
+	},
+	"simple-nohead": TableFormat{
+		LineTop:         Line{"", "-", "  ", ""},
+		LineBottom:      Line{"", "-", "  ", ""},
+		HeaderRow:       Row{"", "  ", ""},
+		DataRow:         Row{"", "  ", ""},
+		Padding:         1,
+	},
+	"plain-nohead": TableFormat{
+		HeaderRow: Row{"", "  ", ""},
+		DataRow:   Row{"", "  ", ""},
+		Padding:   0,
+	},
+	"tab-nohead": TableFormat{
+		HeaderRow: Row{"", "	", ""},
+		DataRow:   Row{"", "	", ""},
+		Padding:   0,
+	},
+	
+	"csv-nohead": TableFormat{
+		HeaderRow: Row{"", ",", ""},
+		DataRow:   Row{"", ",", ""},
+		Padding:   0,
+	},
+	"html-nohead": TableFormat{
+		LineTop:    Line{html, "", "", "<table id=\"tabulate\"><tr>"},
+		LineBottom: Line{"</tr>", "", "", "</table>"},
+		HeaderRow:  Row{"<td>", "</td><th>", "</td></tr>"},
+		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
+		Padding:    0,
+	},
+	
+	"mysqlt-nohead": TableFormat{
+		LineTop:         Line{"+", "-", "+", "+"},
+		//LineBetweenRows: Line{"|", " ", "|", "|"},
+		LineBottom: Line{"+", "-", "+", "+"},
+		HeaderRow:  Row{"|", "|", "|"},
+		DataRow:    Row{"|", "|", "|"},
+		Padding:    1,
+	},
+	"mysql-nohead": TableFormat{
+		LineTop:         Line{"╒", "─", "╤", "╕"},
+		//LineBetweenRows: Line{"│", "─", "┼", "│"},
+		LineBottom:      Line{"└", "─", "┴", "┘"},
+		HeaderRow:       Row{"│", "│", "│"},
+		DataRow:         Row{"│", "│", "│"},
+		Padding:         1,
+	},
+	"grid-nohead": TableFormat{
+		LineTop:         Line{"╒", "─", "╤", "╕"},
+		LineBetweenRows: Line{"│", "─", "┼", "│"},
+		LineBottom:      Line{"└", "─", "┴", "┘"},
+		HeaderRow:       Row{"│", "│", "│"},
+		DataRow:         Row{"│", "│", "│"},
+		Padding:         1,
+	},
+	"gridt-nohead": TableFormat{
+		LineTop:         Line{"+", "-", "+", "+"},
+		LineBetweenRows: Line{"+", "-", "+", "+"},
+		LineBottom:      Line{"+", "-", "+", "+"},
+		HeaderRow:       Row{"|", "|", "|"},
+		DataRow:         Row{"|", "|", "|"},
 		Padding:         1,
 	},
 }
@@ -72,8 +204,6 @@ var MIN_PADDING = 5
 // Main Tabulate structure
 type Tabulate struct {
 	Data          []*TabulateRow
-	Title         string
-	TitleAlign    string
 	Headers       []string
 	FloatFormat   byte
 	TableFormat   TableFormat
@@ -82,8 +212,8 @@ type Tabulate struct {
 	HideLines     []string
 	MaxSize       int
 	WrapStrings   bool
-	WrapDelimiter rune
-	SplitConcat   string
+	RemEmptyLines bool
+	NoHeader bool
 }
 
 // Represents normalized tabulate Row
@@ -202,26 +332,17 @@ func (t *Tabulate) buildRow(elements []string, padded_widths []int, paddings []i
 	return buffer.String()
 }
 
-//SetWrapDelimiter assigns the character ina  string that the rednderer
-//will attempt to split strings on when a cell must be wrapped
-func (t *Tabulate) SetWrapDelimiter(r rune) {
-	t.WrapDelimiter = r
-}
-
-//SetSplitConcat assigns the character that will be used when a WrapDelimiter is
-//set but the renderer cannot abide by the desired split.  This may happen when
-//the WrapDelimiter is a space ' ' but a single word is longer than the width of a cell
-func (t *Tabulate) SetSplitConcat(r string) {
-	t.SplitConcat = r
-}
-
 // Render the data table
 func (t *Tabulate) Render(format ...interface{}) string {
 	var lines []string
 
 	// If headers are set use them, otherwise pop the first row
-	if len(t.Headers) < 1 && len(t.Data) > 1 {
-		t.Headers, t.Data = t.Data[0].Elements, t.Data[1:]
+	if len(t.Headers) < 1 {
+		if t.NoHeader {
+			t.Headers, t.Data = t.Data[0].Elements, t.Data[0:]
+		} else {
+			t.Headers, t.Data = t.Data[0].Elements, t.Data[1:]
+		}
 	}
 
 	// Use the format that was passed as parameter, otherwise
@@ -237,16 +358,7 @@ func (t *Tabulate) Render(format ...interface{}) string {
 
 	// Check if Data is present
 	if len(t.Data) < 1 {
-		return ""
-	}
-
-	if len(t.Headers) < len(t.Data[0].Elements) {
-		diff := len(t.Data[0].Elements) - len(t.Headers)
-		padded_header := make([]string, diff)
-		for _, e := range t.Headers {
-			padded_header = append(padded_header, e)
-		}
-		t.Headers = padded_header
+		panic("No Data specified")
 	}
 
 	// Get Column widths for all columns
@@ -257,44 +369,40 @@ func (t *Tabulate) Render(format ...interface{}) string {
 		padded_widths[i] = cols[i] + MIN_PADDING*t.TableFormat.Padding
 	}
 
-	// Calculate total width of the table
-	totalWidth := len(t.TableFormat.DataRow.sep) * (len(cols) - 1) // Include all but the final separator
-	for _, w := range padded_widths {
-		totalWidth += w
-	}
-
 	// Start appending lines
-	if len(t.Title) > 0 {
-		if !inSlice("aboveTitle", t.HideLines) {
-			lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineTop))
-		}
-		savedAlign := t.Align
-		if len(t.TitleAlign) > 0 {
-			t.SetAlign(t.TitleAlign) // Temporary replace alignment with the title alignment
-		}
-		lines = append(lines, t.buildRow([]string{t.Title}, []int{totalWidth}, nil, t.TableFormat.TitleRow))
-		t.SetAlign(savedAlign)
-	}
 
 	// Append top line if not hidden
 	if !inSlice("top", t.HideLines) {
 		lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineTop))
 	}
-
-	// Add Header
-	lines = append(lines, t.buildRow(t.padRow(t.Headers, t.TableFormat.Padding), padded_widths, cols, t.TableFormat.HeaderRow))
-
-	// Add Line Below Header if not hidden
-	if !inSlice("belowheader", t.HideLines) {
-		lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineBelowHeader))
+	
+	if t.NoHeader != true {
+		// Add Header
+		if len(t.Headers) < len(t.Data[0].Elements) {
+			diff := len(t.Data[0].Elements) - len(t.Headers)
+			padded_header := make([]string, diff)
+			for _, e := range t.Headers {
+				padded_header = append(padded_header, e)
+			}
+			t.Headers = padded_header
+		}
+		lines = append(lines, t.buildRow(t.padRow(t.Headers, t.TableFormat.Padding), padded_widths, cols, t.TableFormat.HeaderRow))
+		
+		// Add Line Below Header if not hidden
+		if !inSlice("belowheader", t.HideLines) {
+			lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineBelowHeader))
+		}
 	}
 
 	// Add Data Rows
 	for index, element := range t.Data {
 		lines = append(lines, t.buildRow(t.padRow(element.Elements, t.TableFormat.Padding), padded_widths, cols, t.TableFormat.DataRow))
 		if index < len(t.Data)-1 {
-			if element.Continuos != true && !inSlice("betweenLine", t.HideLines) {
-				lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineBetweenRows))
+			if element.Continuos != true {
+				if t.RemEmptyLines != true {
+					lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineBetweenRows))
+
+				}
 			}
 		}
 	}
@@ -335,17 +443,9 @@ func (t *Tabulate) getWidths(headers []string, data []*TabulateRow) []int {
 	return widths
 }
 
-// SetTitle sets the title of the table can also accept a second string to define an alignment for the title
-func (t *Tabulate) SetTitle(title ...string) *Tabulate {
-
-	t.Title = title[0]
-	if len(title) > 1 {
-		t.TitleAlign = title[1]
-	}
-
-	return t
+func (t *Tabulate) SetNoHeader() {
+	t.NoHeader = true
 }
-
 // Set Headers of the table
 // If Headers count is less than the data row count, the headers will be padded to the right
 func (t *Tabulate) SetHeaders(headers []string) *Tabulate {
@@ -394,6 +494,10 @@ func (t *Tabulate) SetWrapStrings(wrap bool) {
 	t.WrapStrings = wrap
 }
 
+func (t *Tabulate) SetRemEmptyLines(remEmptyLines bool) {
+	t.RemEmptyLines = remEmptyLines
+}
+
 // Sets the maximum size of cell
 // If WrapStrings is set to true, then the string inside
 // the cell will be split up into multiple cell
@@ -401,49 +505,9 @@ func (t *Tabulate) SetMaxCellSize(max int) {
 	t.MaxSize = max
 }
 
-func (t *Tabulate) splitElement(e string) (bool, string) {
-	//check if we are not attempting to smartly wrap
-	if t.WrapDelimiter == 0 {
-		if t.SplitConcat == "" {
-			return false, runewidth.Truncate(e, t.MaxSize, "")
-		} else {
-			return false, runewidth.Truncate(e, t.MaxSize, t.SplitConcat)
-		}
-	}
-
-	//we are attempting to wrap
-	//grab the current width
-	var i int
-	for i = t.MaxSize; i > 1; i-- {
-		//loop through our proposed truncation size looking for one that ends on
-		//our requested delimiter
-		x := runewidth.Truncate(e, i, "")
-		//check if the NEXT string is a
-		//delimiter, if it IS, then we truncate and tell the caller to shrink
-		r, _ := utf8.DecodeRuneInString(e[i:])
-		if r == 0 || r == 1 {
-			//decode failed, take the truncation as is
-			return false, x
-		}
-		if r == t.WrapDelimiter {
-			return true, x //inform the caller that they can remove the next rune
-		}
-	}
-	//didn't find a good length, truncate at will
-	if t.SplitConcat != "" {
-		return false, runewidth.Truncate(e, t.MaxSize, t.SplitConcat)
-	}
-	return false, runewidth.Truncate(e, t.MaxSize, "")
-}
-
 // If string size is larger than t.MaxSize, then split it to multiple cells (downwards)
 func (t *Tabulate) wrapCellData() []*TabulateRow {
 	var arr []*TabulateRow
-	var cleanSplit bool
-	var addr int
-	if len(t.Data) == 0 {
-		return arr
-	}
 	next := t.Data[0]
 	for index := 0; index <= len(t.Data); index++ {
 		elements := next.Elements
@@ -452,17 +516,7 @@ func (t *Tabulate) wrapCellData() []*TabulateRow {
 		for i, e := range elements {
 			if runewidth.StringWidth(e) > t.MaxSize {
 				elements[i] = runewidth.Truncate(e, t.MaxSize, "")
-				cleanSplit, elements[i] = t.splitElement(e)
-				if cleanSplit {
-					//remove the next rune
-					r, w := utf8.DecodeRuneInString(e[len(elements[i]):])
-					if r != 0 && r != 1 {
-						addr = w
-					}
-				} else {
-					addr = 0
-				}
-				new_elements[i] = e[len(elements[i])+addr:]
+				new_elements[i] = e[len(elements[i]):]
 				next.Continuos = true
 			}
 		}
