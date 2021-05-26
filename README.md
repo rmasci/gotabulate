@@ -1,4 +1,6 @@
 # Gotabulate - Easily pretty-print tabular data
+Fork of https://github.com/bndr/gotabulate.  Added formatting output for mysqlrun.
+
 [![GoDoc](https://godoc.org/github.com/bndr/gotabulate?status.svg)](https://godoc.org/github.com/bndr/gotabulate)
 [![Build Status](https://travis-ci.org/bndr/gotabulate.svg?branch=master)](https://travis-ci.org/bndr/gotabulate)
 
@@ -7,18 +9,22 @@
 Go-Tabulate - Generic Go Library for easy pretty-printing of tabular data. 
 
 ## Installation
-
-    go get github.com/bndr/gotabulate
+    cd <HOME DIRECTORY>/go/codecloud.web.att.com/st_cloudutils #(Make directories if they don't exist)
+    mkdir gotabulate
+    git clone ssh://git@codecloud.web.att.com:7999/st_cloudutils/gotabulate.git gotabulate
+    cd gotabulate
+    export GOOS=linux;export GOARCH=amd64
+    go install `go list`
 
 ## Description
 
 Supported data types:
-- 2D Array of `Int`, `Int64`, `Float64`, `String`, `interface{}`
-- Map of `String`, `interface{}` (Keys will be used as header)
+- 2D Array of Int, Int64, Float64, String, interface{}
+- Map of String, interface{} (Keys will be used as header)
 
 ## Usage
-
 ```go
+
 // Create Some Fake Rows
 row_1 := []interface{}{"john", 20, "ready"}
 row_2 := []interface{}{"bndr", 23, "ready"}
@@ -45,6 +51,7 @@ fmt.Println(t.Render("grid"))
 +---------+--------+-----------+
 |    bndr |     23 |     ready |
 +---------+--------+-----------+
+
 ```
 
 ## Example with String
@@ -70,11 +77,13 @@ fmt.Println(tabulate.Render("simple"))
 
       PC         50%       on Hold
 ---------  ----------  ------------
+
 ```
 
 ## Example with String Wrapping
 
 ```go
+
 tabulate := gotabulate.Create([][]string{[]string{"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus laoreet vestibulum pretium. Nulla et ornare elit. Cum sociis natoque penatibus et magnis",
 	"Vivamus laoreet vestibulum pretium. Nulla et ornare elit. Cum sociis natoque penatibus et magnis", "zzLorem ipsum", " test", "test"}, []string{"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus laoreet vestibulum pretium. Nulla et ornare elit. Cum sociis natoque penatibus et magnis",
 	"Vivamus laoreet vestibulum pretium. Nulla et ornare elit. Cum sociis natoque penatibus et magnis", "zzLorem ipsum", " test", "test"}, STRING_ARRAY, []string{"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus laoreet vestibulum pretium. Nulla et ornare elit. Cum sociis natoque penatibus et magnis",
@@ -130,6 +139,7 @@ fmt.Println(tabulate.Render("grid"))
 +---------------------+---------------------+----------------+-------------+-------------+
 |         test string |       test string 2 |           test |         row |        bndr |
 +---------------------+---------------------+----------------+-------------+-------------+
+
 ```
 ## Examples
 
@@ -199,7 +209,6 @@ Align Left:
 ```
 
 ### Status
-
 Beta version. There may be edge cases that I have missed, so if your tables don't render properly please open up an issue. 
 
 ## Contribute
@@ -211,12 +220,11 @@ All Contributions are welcome. The todo list is on the bottom of this README. Fe
 Apache License 2.0
 
 ## TODO
-
-- [ ] Add more examples
-- [ ] Better Documentation
-- [ ] Implement more data table formats
-- [ ] Decimal point alignment for floats
+- Add more examples
+- Better Documentation
+- Implement more data table formats
+- Decimal point alignment for floats
 
 ## Acknowledgement
 
-Inspired by Python package [tabulate](https://pypi.python.org/pypi/tabulate)
+Inspired by Python package https://pypi.python.org/pypi/tabulate
