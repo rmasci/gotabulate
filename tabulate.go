@@ -1,9 +1,12 @@
 package gotabulate
 
-import "fmt"
-import "bytes"
-import "github.com/mattn/go-runewidth"
-import "math"
+import (
+	"bytes"
+	"fmt"
+	"math"
+
+	"github.com/mattn/go-runewidth"
+)
 
 // Basic Structure of TableFormat
 type TableFormat struct {
@@ -80,8 +83,8 @@ var TableFormats = map[string]TableFormat{
 	},
 	"tab": TableFormat{
 		HeaderRow: Row{"", "	", ""},
-		DataRow:   Row{"", "	", ""},
-		Padding:   1,
+		DataRow: Row{"", "	", ""},
+		Padding: 1,
 	},
 
 	"csv": TableFormat{
@@ -97,7 +100,7 @@ var TableFormats = map[string]TableFormat{
 		Padding:    0,
 	},
 
-	"mysqlt": TableFormat{
+	"mysql": TableFormat{
 		LineTop:         Line{"+", "-", "+", "+"},
 		LineBelowHeader: Line{"+", "=", "+", "+"},
 		//LineBetweenRows: Line{"|", " ", "|", "|"},
@@ -106,14 +109,14 @@ var TableFormats = map[string]TableFormat{
 		DataRow:    Row{"|", "|", "|"},
 		Padding:    1,
 	},
-	"mysql": TableFormat{
+	"mysqlg": TableFormat{
 		LineTop:         Line{"╒", "═", "╤", "╕"},
 		LineBelowHeader: Line{"╞", "═", "╪", "╡"},
 		//LineBetweenRows: Line{"│", "─", "┼", "│"},
-		LineBottom:      Line{"└", "─", "┴", "┘"},
-		HeaderRow:       Row{"│", "│", "│"},
-		DataRow:         Row{"│", "│", "│"},
-		Padding:         1,
+		LineBottom: Line{"└", "─", "┴", "┘"},
+		HeaderRow:  Row{"│", "│", "│"},
+		DataRow:    Row{"│", "│", "│"},
+		Padding:    1,
 	},
 	"grid": TableFormat{
 		LineTop:         Line{"╒", "═", "╤", "╕"},
@@ -134,11 +137,11 @@ var TableFormats = map[string]TableFormat{
 		Padding:         1,
 	},
 	"simple-nohead": TableFormat{
-		LineTop:         Line{"", "-", "  ", ""},
-		LineBottom:      Line{"", "-", "  ", ""},
-		HeaderRow:       Row{"", "  ", ""},
-		DataRow:         Row{"", "  ", ""},
-		Padding:         1,
+		LineTop:    Line{"", "-", "  ", ""},
+		LineBottom: Line{"", "-", "  ", ""},
+		HeaderRow:  Row{"", "  ", ""},
+		DataRow:    Row{"", "  ", ""},
+		Padding:    1,
 	},
 	"plain-nohead": TableFormat{
 		HeaderRow: Row{"", "  ", ""},
@@ -147,10 +150,10 @@ var TableFormats = map[string]TableFormat{
 	},
 	"tab-nohead": TableFormat{
 		HeaderRow: Row{"", "	", ""},
-		DataRow:   Row{"", "	", ""},
-		Padding:   0,
+		DataRow: Row{"", "	", ""},
+		Padding: 0,
 	},
-	
+
 	"csv-nohead": TableFormat{
 		HeaderRow: Row{"", ",", ""},
 		DataRow:   Row{"", ",", ""},
@@ -163,9 +166,9 @@ var TableFormats = map[string]TableFormat{
 		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
 		Padding:    0,
 	},
-	
+
 	"mysqlt-nohead": TableFormat{
-		LineTop:         Line{"+", "-", "+", "+"},
+		LineTop: Line{"+", "-", "+", "+"},
 		//LineBetweenRows: Line{"|", " ", "|", "|"},
 		LineBottom: Line{"+", "-", "+", "+"},
 		HeaderRow:  Row{"|", "|", "|"},
@@ -173,12 +176,12 @@ var TableFormats = map[string]TableFormat{
 		Padding:    1,
 	},
 	"mysql-nohead": TableFormat{
-		LineTop:         Line{"╒", "─", "╤", "╕"},
+		LineTop: Line{"╒", "─", "╤", "╕"},
 		//LineBetweenRows: Line{"│", "─", "┼", "│"},
-		LineBottom:      Line{"└", "─", "┴", "┘"},
-		HeaderRow:       Row{"│", "│", "│"},
-		DataRow:         Row{"│", "│", "│"},
-		Padding:         1,
+		LineBottom: Line{"└", "─", "┴", "┘"},
+		HeaderRow:  Row{"│", "│", "│"},
+		DataRow:    Row{"│", "│", "│"},
+		Padding:    1,
 	},
 	"grid-nohead": TableFormat{
 		LineTop:         Line{"╒", "─", "╤", "╕"},
@@ -213,7 +216,7 @@ type Tabulate struct {
 	MaxSize       int
 	WrapStrings   bool
 	RemEmptyLines bool
-	NoHeader bool
+	NoHeader      bool
 }
 
 // Represents normalized tabulate Row
@@ -375,7 +378,7 @@ func (t *Tabulate) Render(format ...interface{}) string {
 	if !inSlice("top", t.HideLines) {
 		lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineTop))
 	}
-	
+
 	if t.NoHeader != true {
 		// Add Header
 		if len(t.Headers) < len(t.Data[0].Elements) {
@@ -387,7 +390,7 @@ func (t *Tabulate) Render(format ...interface{}) string {
 			t.Headers = padded_header
 		}
 		lines = append(lines, t.buildRow(t.padRow(t.Headers, t.TableFormat.Padding), padded_widths, cols, t.TableFormat.HeaderRow))
-		
+
 		// Add Line Below Header if not hidden
 		if !inSlice("belowheader", t.HideLines) {
 			lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineBelowHeader))
@@ -446,6 +449,7 @@ func (t *Tabulate) getWidths(headers []string, data []*TabulateRow) []int {
 func (t *Tabulate) SetNoHeader() {
 	t.NoHeader = true
 }
+
 // Set Headers of the table
 // If Headers count is less than the data row count, the headers will be padded to the right
 func (t *Tabulate) SetHeaders(headers []string) *Tabulate {

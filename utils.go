@@ -1,7 +1,9 @@
 package gotabulate
 
-import "strconv"
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // Create normalized Array from strings
 func createFromString(data [][]string) []*TabulateRow {

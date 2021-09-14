@@ -1,8 +1,11 @@
 package gotabulate
 
-import "testing"
-import "io/ioutil"
-import "github.com/stretchr/testify/assert"
+import (
+	"io/ioutil"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 var HEADERS = []string{"Header 1", "Header 2", "Header 3", "Header 4", "Header 5"}
 var INT_ARRAY = []int{1, 2, 3, 1000, 200}
