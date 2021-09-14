@@ -1,2 +1,6 @@
 # Contributors git log --format='%aN <%aE>' | sort -uf
+Original Author
 Vadim Kravcenko <bndrzz@gmail.com>
+
+Fork and add functions / formats
+Richard Masci <rmasci@gmail.com>

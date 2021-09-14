@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"codecloud.web.att.com/st_cloudutils/gotabulate"
+	"github.com/rmasci/gotabulate"
 )
 
 func main() {
