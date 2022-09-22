@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/tealeg/xlsx"
 )
 
 /*-
@@ -149,4 +151,30 @@ func PrintCol(line, columns string, space bool) []string {
 		}
 	}
 	return out
+}
+
+// Take CSV formatted text (csvIn String) and print it out as an XLS file.
+func ExcelOut(csvIn, sheetname, excelFile string) error {
+	lines := strings.Split(csvIn, "\n")
+	xlsxFile := xlsx.NewFile()
+	if sheetname == "" {
+		sheetname = "Sheet1"
+	}
+	sheet, err := xlsxFile.AddSheet(sheetname)
+	if err != nil {
+		return err
+	}
+
+	for _, l := range lines {
+		lArr :=strings.Split(l, ",")
+		row := sheet.AddRow()
+		for _, field := range lArr {
+			cell := row.AddCell()
+			cell.Value = field
+		}
+	}
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+	return xlsxFile.Save(excelFile)
 }

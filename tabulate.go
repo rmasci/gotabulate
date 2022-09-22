@@ -64,6 +64,34 @@ var html string = `<!DOCTYPE html>
 </style>
 </div>`
 
+// Show Formats prints out the formats available to the user
+func ShowFormats() {
+	var availableFormats = []string{"simple",
+		"plain - Plain Table output",
+		"tab - Just text tab separated",
+		"csv - Output in CSV format",
+		"html - Output in HTML Table",
+		"mysql - Looks like a MySQL Query",
+		"mysqlg - MySQL Query but using Graphical Grid",
+		"grid - Spreadsheet using Graphical Grid",
+		"gridt - Spreadsheet using text grid",
+		"-- Same as above with no header --",
+		"simple-nohead ",
+		"plain-nohead",
+		"tab-nohead",
+		"csv-nohead",
+		"html-nohead",
+		"mysqlt-nohead",
+		"mysql-nohead",
+		"grid-nohead",
+		"gridt-nohead",
+	}
+	fmt.Println("Available Output Formats:")
+	for _, l := range availableFormats {
+		fmt.Printf("\t%v\n", l)
+	}
+}
+
 // Table Formats that are available to the user
 // The user can define his own format, just by addind an entry to this map
 // and calling it with Render function e.g t.Render("customFormat")
