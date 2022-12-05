@@ -111,8 +111,8 @@ var TableFormats = map[string]TableFormat{
 	},
 	"tab": TableFormat{
 		HeaderRow: Row{"", "	", ""},
-		DataRow: Row{"", "	", ""},
-		Padding: 1,
+		DataRow:   Row{"", "	", ""},
+		Padding:   1,
 	},
 
 	"csv": TableFormat{
@@ -155,6 +155,15 @@ var TableFormats = map[string]TableFormat{
 		DataRow:         Row{"│", "│", "│"},
 		Padding:         1,
 	},
+	"bingo": TableFormat{
+		LineTop:         Line{"╒", "═", "╤", "╕"},
+		LineBelowHeader: Line{"╞", "═", "╪", "╡"},
+		LineBetweenRows: Line{"│", "─", "┼", "│"},
+		LineBottom:      Line{"└", "─", "┴", "┘"},
+		HeaderRow:       Row{"│", "│", "│"},
+		DataRow:         Row{"│", "│", "│"},
+		Padding:         5,
+	},
 	"gridt": TableFormat{
 		LineTop:         Line{"+", "-", "+", "+"},
 		LineBelowHeader: Line{"+", "=", "+", "+"},
@@ -178,8 +187,8 @@ var TableFormats = map[string]TableFormat{
 	},
 	"tab-nohead": TableFormat{
 		HeaderRow: Row{"", "	", ""},
-		DataRow: Row{"", "	", ""},
-		Padding: 0,
+		DataRow:   Row{"", "	", ""},
+		Padding:   0,
 	},
 
 	"csv-nohead": TableFormat{
@@ -245,6 +254,7 @@ type Tabulate struct {
 	WrapStrings   bool
 	RemEmptyLines bool
 	NoHeader      bool
+	Index         bool
 }
 
 // Represents normalized tabulate Row
@@ -337,6 +347,11 @@ func (t *Tabulate) buildLine(padded_widths []int, padding []int, l Line) string 
 
 	buffer.WriteString(l.end)
 	return buffer.String()
+}
+
+// set Index to automatically add a column for line number
+func (t *Tabulate) SetIndex(index bool) {
+	t.Index = index
 }
 
 // Build Row based on padded_widths from t.GetWidths()
