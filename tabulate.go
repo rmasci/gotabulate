@@ -75,6 +75,7 @@ func ShowFormats() {
 		"mysqlg - MySQL Query but using Graphical Grid",
 		"grid - Spreadsheet using Graphical Grid",
 		"gridt - Spreadsheet using text grid",
+		"bingo -- make a bingo card",
 		"-- Same as above with no header --",
 		"simple-nohead ",
 		"plain-nohead",
