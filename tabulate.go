@@ -163,7 +163,7 @@ var TableFormats = map[string]TableFormat{
 		LineBottom:      Line{"└", "─", "┴", "┘"},
 		HeaderRow:       Row{"│", "│", "│"},
 		DataRow:         Row{"│", "│", "│"},
-		Padding:         5,
+		Padding:         1,
 	},
 	"gridt": TableFormat{
 		LineTop:         Line{"+", "-", "+", "+"},
