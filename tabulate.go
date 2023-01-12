@@ -405,7 +405,7 @@ func (t *Tabulate) Render(format ...interface{}) string {
 
 	// Check if Data is present
 	if len(t.Data) <= 0 {
-		return fmt.Sprintln("go tabulate render - no data specified")
+		return fmt.Sprintln("go tabulate render - no data specified!")
 	}
 
 	// Get Column widths for all columns
