@@ -115,7 +115,11 @@ var TableFormats = map[string]TableFormat{
 		DataRow:   Row{"", "	", ""},
 		Padding:   1,
 	},
-
+	"text": TableFormat{
+		HeaderRow: Row{"", " ", ""},
+		DataRow:   Row{"", " ", ""},
+		Padding:   0,
+	},
 	"csv": TableFormat{
 		HeaderRow: Row{"", ",", ""},
 		DataRow:   Row{"", ",", ""},
@@ -404,8 +408,8 @@ func (t *Tabulate) Render(format ...interface{}) string {
 	}
 
 	// Check if Data is present
-	if len(t.Data) <= 0 {
-		return fmt.Sprintln("go tabulate render - no data specified!")
+	if len(t.Data) < 1 {
+		return fmt.Sprintln("go tabulate render - no data specified")
 	}
 
 	// Get Column widths for all columns
