@@ -64,6 +64,55 @@ var html string = `<!DOCTYPE html>
 </style>
 </div>`
 
+var bingohtml1 string = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bingo Card</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    td, th {
+      border: 1px solid black;
+      width: 160px;
+      height: 160px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .highlight {
+      background-color: yellow;
+    }
+    .bingo-container {
+      display: inline-block;
+      text-align: center;
+    }
+    .bingo-header {
+      font-family: 'Snell Roundhand', cursive;
+      font-size: 44pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+<div class=bingo-container>
+<h1 class="bingo-header">Holliday Fun Fact Bingo</h1>
+`
+var bingohtml2 string = `
+<script>
+  function toggleHighlight(cell) {
+    cell.classList.toggle('highlight');
+    checkForBingo();
+  }
+</script>
+</body>
+</html>`
+
 // Show Formats prints out the formats available to the user
 func ShowFormats() {
 	var availableFormats = []string{"simple",
@@ -125,6 +174,13 @@ var TableFormats = map[string]TableFormat{
 		DataRow:   Row{"", ",", ""},
 		Padding:   0,
 	},
+	"bingohtml": TableFormat{
+		LineTop:    Line{bingohtml1, "", "", "<table id=\"tabulate\"><tr>"},
+		LineBottom: Line{"</tr>", "", "", "</table>" + bingohtml2},
+		HeaderRow:  Row{"<th>", "</th><th>", "</th></tr>"},
+		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
+		Padding:    0,
+	},
 	"html": TableFormat{
 		LineTop:    Line{html, "", "", "<table id=\"tabulate\"><tr>"},
 		LineBottom: Line{"</tr>", "", "", "</table>"},
@@ -132,7 +188,14 @@ var TableFormats = map[string]TableFormat{
 		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
 		Padding:    0,
 	},
-
+	// TODO: Use bootstrap table css
+	//"html1": TableFormat{
+	//	LineTop:    Line{html, "", "", "<table id=\"tabulate\"><tr>"},
+	//	LineBottom: Line{"</tr>", "", "", "</table>"},
+	//	HeaderRow:  Row{"<th>", "</th><th>", "</th></tr>"},
+	//	DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
+	//	Padding:    0,
+	//},
 	"mysql": TableFormat{
 		LineTop:         Line{"+", "-", "+", "+"},
 		LineBelowHeader: Line{"+", "=", "+", "+"},
