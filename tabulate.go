@@ -181,6 +181,13 @@ var TableFormats = map[string]TableFormat{
 		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
 		Padding:    0,
 	},
+	"htmlt": TableFormat{
+		LineTop:    Line{html + "{{.Header}}", "", "", "<table id=\"tabulate\"><tr>"},
+		LineBottom: Line{"</tr>", "", "", "</table>"},
+		HeaderRow:  Row{"<th>", "</th><th>", "</th></tr>"},
+		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
+		Padding:    0,
+	},
 	"html": TableFormat{
 		LineTop:    Line{html, "", "", "<table id=\"tabulate\"><tr>"},
 		LineBottom: Line{"</tr>", "", "", "</table>"},
