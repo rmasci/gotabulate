@@ -22,6 +22,12 @@ Supported data types:
 - 2D Array of Int, Int64, Float64, String, interface{}
 - Map of String, interface{} (Keys will be used as header)
 
+Supported output formats:
+- Text grids: simple, grid, gridt, mysql, mysqlg, bingo
+- Data formats: csv, tab, plain, text
+- Markup: markdown, rst
+- HTML: Modern Bootstrap 5 tables (CDN or offline mode)
+
 ## Usage
 ```go
 
@@ -53,6 +59,40 @@ fmt.Println(t.Render("grid"))
 +---------+--------+-----------+
 
 ```
+
+## HTML Table Generation
+
+Generate modern Bootstrap tables in multiple modes:
+
+**Default - CDN mode (small files, assumes internet):**
+```go
+table := gotabulate.Create(data)
+table.SetHeaders([]string{"Name", "Value"})
+html := table.Render("html")  // ~2KB file, uses CDN
+```
+
+**Offline mode (embedded CSS, no internet needed):**
+```go
+table := gotabulate.Create(data)
+table.SetHeaders([]string{"Name", "Value"})
+table.SetHTMLOfflineMode()  // Embed Bootstrap CSS
+html := table.Render("html")  // ~100KB file, self-contained
+```
+
+**Minimal CSS (no Bootstrap):**
+```go
+table := gotabulate.Create(data)
+table.SetHeaders([]string{"Name", "Value"})
+table.SetHTMLMinimal()
+html := table.Render("html")  // Clean styling, offline
+```
+
+Supported HTML options:
+- `SetHTMLBootstrap(version)` - Bootstrap 4 or 5
+- `SetHTMLTitle(title)` - Add table title
+- `SetHTMLOfflineMode()` - Embed CSS for offline use
+- `SetHTMLUseCDN(true/false)` - Toggle CDN vs embedded
+- `SetHTMLCustomCSS(css)` - Add custom styles
 
 ## Example with String
 

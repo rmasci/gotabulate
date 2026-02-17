@@ -1,3 +1,5 @@
+// Package gotabulate provides table formatting and rendering capabilities.
+// It supports multiple output formats including text grids, HTML, CSV, and more.
 package gotabulate
 
 import (
@@ -8,7 +10,7 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-// Basic Structure of TableFormat
+// TableFormat defines the structure and styling of table output.
 type TableFormat struct {
 	LineTop         Line
 	LineBelowHeader Line
@@ -21,7 +23,7 @@ type TableFormat struct {
 	FitScreen       bool
 }
 
-// Represents a Line
+// Line represents a horizontal line element in a table.
 type Line struct {
 	begin string
 	hline string
@@ -29,14 +31,14 @@ type Line struct {
 	end   string
 }
 
-// Represents a Row
+// Row represents a row element in a table.
 type Row struct {
 	begin string
 	sep   string
 	end   string
 }
 
-var html string = `<!DOCTYPE html>
+const htmlTemplate = `<!DOCTYPE html>
 <html>
 <div class="tabulate">
 <style type="text/css">
@@ -64,89 +66,60 @@ var html string = `<!DOCTYPE html>
 </style>
 </div>`
 
-var bingohtml1 string = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Bingo Card</title>
-  <style>
-    table {
-      border-collapse: collapse;
-    }
-    td, th {
-      border: 1px solid black;
-      width: 160px;
-      height: 160px;
-      text-align: center;
-      vertical-align: middle;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .highlight {
-      background-color: yellow;
-    }
-    .bingo-container {
-      display: inline-block;
-      text-align: center;
-    }
-    .bingo-header {
-      font-family: 'Snell Roundhand', cursive;
-      font-size: 44pt;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 10px;
-      color: red;
-    }
-  </style>
-</head>
-<body>
-<div class=bingo-container>
-<h1 class="bingo-header">Holliday Fun Fact Bingo</h1>
-`
-var bingohtml2 string = `
-<script>
-  function toggleHighlight(cell) {
-    cell.classList.toggle('highlight');
-    checkForBingo();
-  }
-</script>
-</body>
-</html>`
-
-// Show Formats prints out the formats available to the user
+// ShowFormats prints all available table formats to standard output.
 func ShowFormats() {
-	var availableFormats = []string{"simple",
-		"plain - Plain Table output",
-		"tab - Just text tab separated",
-		"csv - Output in CSV format",
-		"html - Output in HTML Table",
-		"mysql - Looks like a MySQL Query",
-		"mysqlg - MySQL Query but using Graphical Grid",
-		"grid - Spreadsheet using Graphical Grid",
-		"gridt - Spreadsheet using text grid",
-		"bingo -- make a bingo card",
-		"-- Same as above with no header --",
-		"simple-nohead ",
-		"plain-nohead",
-		"tab-nohead",
-		"csv-nohead",
-		"html-nohead",
-		"mysqlt-nohead",
-		"mysql-nohead",
-		"grid-nohead",
-		"gridt-nohead",
+	availableFormats := []string{
+		"Basic Text Formats:",
+		"  simple      - Minimal ASCII table with dashes",
+		"  plain       - No borders, space-separated columns",
+		"  tab         - Tab-separated values (TSV)",
+		"  text        - Space-separated text with minimal padding",
+		"  csv         - Comma-separated values",
+		"",
+		"MySQL-style Formats:",
+		"  mysql       - ASCII art grid styled like MySQL output",
+		"  mysqlg      - Unicode grid with MySQL-like styling",
+		"",
+		"Unicode Box Drawing:",
+		"  grid        - Full Unicode box drawing with row lines",
+		"  gridt       - Text-based grid with ASCII characters",
+		"  bingo       - Special format with box drawing",
+		"",
+		"Documentation Formats:",
+		"  markdown    - Markdown table format",
+		"  rst         - reStructuredText table format",
+		"",
+		"No-Header Variants (append -nohead):",
+		"  simple-nohead, plain-nohead, tab-nohead, csv-nohead,",
+		"  text-nohead, mysql-nohead, mysqlg-nohead, grid-nohead,",
+		"  gridt-nohead, markdown-nohead, rst-nohead",
 	}
 	fmt.Println("Available Output Formats:")
-	for _, l := range availableFormats {
-		fmt.Printf("\t%v\n", l)
+	for _, format := range availableFormats {
+		fmt.Println(format)
 	}
 }
 
-// Table Formats that are available to the user
-// The user can define his own format, just by addind an entry to this map
-// and calling it with Render function e.g t.Render("customFormat")
+// TableFormats contains all available table format configurations.
+// Users can define custom formats by adding entries to this map and calling Render.
+//
+// Formats:
+//   - simple: Minimal ASCII table with dashes
+//   - plain: No borders, space-separated columns
+//   - tab: Tab-separated values (TSV)
+//   - text: Space-separated text (minimal padding)
+//   - csv: Comma-separated values
+//   - mysql: ASCII art grid styled like MySQL output
+//   - mysqlg: Unicode grid styled like MySQL with box drawing characters
+//   - grid: Full Unicode box drawing with lines between rows
+//   - gridt: Text-based grid with ASCII characters
+//   - markdown: Markdown table format
+//   - rst: reStructuredText table format
+//   - json: JSON array format
+//   - plus suffix "-nohead" variants that suppress headers
 var TableFormats = map[string]TableFormat{
-	"simple": TableFormat{
+	// ==================== Basic Text Formats ====================
+	"simple": {
 		LineTop:         Line{"", "-", "  ", ""},
 		LineBelowHeader: Line{"", "-", "  ", ""},
 		LineBottom:      Line{"", "-", "  ", ""},
@@ -154,74 +127,47 @@ var TableFormats = map[string]TableFormat{
 		DataRow:         Row{"", "  ", ""},
 		Padding:         1,
 	},
-	"plain": TableFormat{
+	"plain": {
 		HeaderRow: Row{"", "  ", ""},
 		DataRow:   Row{"", "  ", ""},
 		Padding:   1,
 	},
-	"tab": TableFormat{
-		HeaderRow: Row{"", "	", ""},
-		DataRow:   Row{"", "	", ""},
-		Padding:   1,
+	"tab": {
+		HeaderRow: Row{"", "\t", ""},
+		DataRow:   Row{"", "\t", ""},
+		Padding:   0,
 	},
-	"text": TableFormat{
+	"text": {
 		HeaderRow: Row{"", " ", ""},
 		DataRow:   Row{"", " ", ""},
 		Padding:   0,
 	},
-	"csv": TableFormat{
+	"csv": {
 		HeaderRow: Row{"", ",", ""},
 		DataRow:   Row{"", ",", ""},
 		Padding:   0,
 	},
-	"bingohtml": TableFormat{
-		LineTop:    Line{bingohtml1, "", "", "<table id=\"tabulate\"><tr>"},
-		LineBottom: Line{"</tr>", "", "", "</table>" + bingohtml2},
-		HeaderRow:  Row{"<th>", "</th><th>", "</th></tr>"},
-		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
-		Padding:    0,
-	},
-	"htmlt": TableFormat{
-		LineTop:    Line{html + "{{.Header}}", "", "", "<table id=\"tabulate\"><tr>"},
-		LineBottom: Line{"</tr>", "", "", "</table>"},
-		HeaderRow:  Row{"<th>", "</th><th>", "</th></tr>"},
-		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
-		Padding:    0,
-	},
-	"html": TableFormat{
-		LineTop:    Line{html, "", "", "<table id=\"tabulate\"><tr>"},
-		LineBottom: Line{"</tr>", "", "", "</table>"},
-		HeaderRow:  Row{"<th>", "</th><th>", "</th></tr>"},
-		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
-		Padding:    0,
-	},
-	// TODO: Use bootstrap table css
-	//"html1": TableFormat{
-	//	LineTop:    Line{html, "", "", "<table id=\"tabulate\"><tr>"},
-	//	LineBottom: Line{"</tr>", "", "", "</table>"},
-	//	HeaderRow:  Row{"<th>", "</th><th>", "</th></tr>"},
-	//	DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
-	//	Padding:    0,
-	//},
-	"mysql": TableFormat{
+
+	// ==================== MySQL-style Formats ====================
+	"mysql": {
 		LineTop:         Line{"+", "-", "+", "+"},
 		LineBelowHeader: Line{"+", "=", "+", "+"},
-		//LineBetweenRows: Line{"|", " ", "|", "|"},
-		LineBottom: Line{"+", "-", "+", "+"},
-		HeaderRow:  Row{"|", "|", "|"},
-		DataRow:    Row{"|", "|", "|"},
-		Padding:    1,
+		LineBottom:      Line{"+", "-", "+", "+"},
+		HeaderRow:       Row{"|", "|", "|"},
+		DataRow:         Row{"|", "|", "|"},
+		Padding:         1,
 	},
-	"mysqlg": TableFormat{
+	"mysqlg": {
 		LineTop:         Line{"╒", "═", "╤", "╕"},
 		LineBelowHeader: Line{"╞", "═", "╪", "╡"},
-		//LineBetweenRows: Line{"│", "─", "┼", "│"},
-		LineBottom: Line{"└", "─", "┴", "┘"},
-		HeaderRow:  Row{"│", "│", "│"},
-		DataRow:    Row{"│", "│", "│"},
-		Padding:    1,
+		LineBottom:      Line{"└", "─", "┴", "┘"},
+		HeaderRow:       Row{"│", "│", "│"},
+		DataRow:         Row{"│", "│", "│"},
+		Padding:         1,
 	},
-	"grid": TableFormat{
+
+	// ==================== Unicode Box Drawing ====================
+	"grid": {
 		LineTop:         Line{"╒", "═", "╤", "╕"},
 		LineBelowHeader: Line{"╞", "═", "╪", "╡"},
 		LineBetweenRows: Line{"│", "─", "┼", "│"},
@@ -230,16 +176,7 @@ var TableFormats = map[string]TableFormat{
 		DataRow:         Row{"│", "│", "│"},
 		Padding:         1,
 	},
-	"bingo": TableFormat{
-		LineTop:         Line{"╒", "═", "╤", "╕"},
-		LineBelowHeader: Line{"╞", "═", "╪", "╡"},
-		LineBetweenRows: Line{"│", "─", "┼", "│"},
-		LineBottom:      Line{"└", "─", "┴", "┘"},
-		HeaderRow:       Row{"│", "│", "│"},
-		DataRow:         Row{"│", "│", "│"},
-		Padding:         1,
-	},
-	"gridt": TableFormat{
+	"gridt": {
 		LineTop:         Line{"+", "-", "+", "+"},
 		LineBelowHeader: Line{"+", "=", "+", "+"},
 		LineBetweenRows: Line{"+", "-", "+", "+"},
@@ -248,54 +185,75 @@ var TableFormats = map[string]TableFormat{
 		DataRow:         Row{"|", "|", "|"},
 		Padding:         1,
 	},
-	"simple-nohead": TableFormat{
+	"bingo": {
+		LineTop:         Line{"╒", "═", "╤", "╕"},
+		LineBelowHeader: Line{"╞", "═", "╪", "╡"},
+		LineBetweenRows: Line{"│", "─", "┼", "│"},
+		LineBottom:      Line{"└", "─", "┴", "┘"},
+		HeaderRow:       Row{"│", "│", "│"},
+		DataRow:         Row{"│", "│", "│"},
+		Padding:         1,
+	},
+
+	// ==================== Documentation Formats ====================
+	"markdown": {
+		LineBelowHeader: Line{"|", "-", "|", "|"},
+		HeaderRow:       Row{"| ", " | ", " |"},
+		DataRow:         Row{"| ", " | ", " |"},
+		Padding:         0,
+	},
+	"rst": {
+		LineTop:         Line{"", "=", " ", ""},
+		LineBelowHeader: Line{"", "=", " ", ""},
+		LineBottom:      Line{"", "=", " ", ""},
+		HeaderRow:       Row{"", "  ", ""},
+		DataRow:         Row{"", "  ", ""},
+		Padding:         1,
+	},
+
+	// ==================== No Header Variants ====================
+	"simple-nohead": {
 		LineTop:    Line{"", "-", "  ", ""},
 		LineBottom: Line{"", "-", "  ", ""},
 		HeaderRow:  Row{"", "  ", ""},
 		DataRow:    Row{"", "  ", ""},
 		Padding:    1,
 	},
-	"plain-nohead": TableFormat{
+	"plain-nohead": {
 		HeaderRow: Row{"", "  ", ""},
 		DataRow:   Row{"", "  ", ""},
 		Padding:   0,
 	},
-	"tab-nohead": TableFormat{
-		HeaderRow: Row{"", "	", ""},
-		DataRow:   Row{"", "	", ""},
+	"tab-nohead": {
+		HeaderRow: Row{"", "\t", ""},
+		DataRow:   Row{"", "\t", ""},
 		Padding:   0,
 	},
-
-	"csv-nohead": TableFormat{
+	"csv-nohead": {
 		HeaderRow: Row{"", ",", ""},
 		DataRow:   Row{"", ",", ""},
 		Padding:   0,
 	},
-	"html-nohead": TableFormat{
-		LineTop:    Line{html, "", "", "<table id=\"tabulate\"><tr>"},
-		LineBottom: Line{"</tr>", "", "", "</table>"},
-		HeaderRow:  Row{"<td>", "</td><th>", "</td></tr>"},
-		DataRow:    Row{"<td>", "</td><td>", "</td></tr>"},
-		Padding:    0,
+	"text-nohead": {
+		HeaderRow: Row{"", " ", ""},
+		DataRow:   Row{"", " ", ""},
+		Padding:   0,
 	},
-
-	"mysqlt-nohead": TableFormat{
-		LineTop: Line{"+", "-", "+", "+"},
-		//LineBetweenRows: Line{"|", " ", "|", "|"},
+	"mysql-nohead": {
+		LineTop:    Line{"+", "-", "+", "+"},
 		LineBottom: Line{"+", "-", "+", "+"},
 		HeaderRow:  Row{"|", "|", "|"},
 		DataRow:    Row{"|", "|", "|"},
 		Padding:    1,
 	},
-	"mysql-nohead": TableFormat{
-		LineTop: Line{"╒", "─", "╤", "╕"},
-		//LineBetweenRows: Line{"│", "─", "┼", "│"},
+	"mysqlg-nohead": {
+		LineTop:    Line{"╒", "─", "╤", "╕"},
 		LineBottom: Line{"└", "─", "┴", "┘"},
 		HeaderRow:  Row{"│", "│", "│"},
 		DataRow:    Row{"│", "│", "│"},
 		Padding:    1,
 	},
-	"grid-nohead": TableFormat{
+	"grid-nohead": {
 		LineTop:         Line{"╒", "─", "╤", "╕"},
 		LineBetweenRows: Line{"│", "─", "┼", "│"},
 		LineBottom:      Line{"└", "─", "┴", "┘"},
@@ -303,7 +261,7 @@ var TableFormats = map[string]TableFormat{
 		DataRow:         Row{"│", "│", "│"},
 		Padding:         1,
 	},
-	"gridt-nohead": TableFormat{
+	"gridt-nohead": {
 		LineTop:         Line{"+", "-", "+", "+"},
 		LineBetweenRows: Line{"+", "-", "+", "+"},
 		LineBottom:      Line{"+", "-", "+", "+"},
@@ -311,12 +269,24 @@ var TableFormats = map[string]TableFormat{
 		DataRow:         Row{"|", "|", "|"},
 		Padding:         1,
 	},
+	"markdown-nohead": {
+		HeaderRow: Row{"| ", " | ", " |"},
+		DataRow:   Row{"| ", " | ", " |"},
+		Padding:   0,
+	},
+	"rst-nohead": {
+		LineTop:    Line{"", "=", " ", ""},
+		LineBottom: Line{"", "=", " ", ""},
+		HeaderRow:  Row{"", "  ", ""},
+		DataRow:    Row{"", "  ", ""},
+		Padding:    1,
+	},
 }
 
-// Minimum padding that will be applied
-var MIN_PADDING = 5
+// minPadding is the minimum padding applied to table cells.
+const minPadding = 5
 
-// Main Tabulate structure
+// Tabulate represents a data table with formatting options.
 type Tabulate struct {
 	Data          []*TabulateRow
 	Headers       []string
@@ -330,82 +300,87 @@ type Tabulate struct {
 	RemEmptyLines bool
 	NoHeader      bool
 	Index         bool
+	HTMLConfig    HTMLConfig
 }
 
-// Represents normalized tabulate Row
+// TabulateRow represents a normalized row in a table.
 type TabulateRow struct {
-	Elements  []string
-	Continuos bool
+	Elements   []string
+	Continuous bool
 }
 
+// writeBuffer is a utility for efficient string building.
 type writeBuffer struct {
 	Buffer bytes.Buffer
 }
 
-func createBuffer() *writeBuffer {
+func newWriteBuffer() *writeBuffer {
 	return &writeBuffer{}
 }
 
+// Write repeats str count times in the buffer.
 func (b *writeBuffer) Write(str string, count int) *writeBuffer {
 	for i := 0; i < count; i++ {
 		b.Buffer.WriteString(str)
 	}
 	return b
 }
+
+// String returns the buffer contents as a string.
 func (b *writeBuffer) String() string {
 	return b.Buffer.String()
 }
 
-// Add padding to each cell
+// padRow adds padding to each element in the array.
 func (t *Tabulate) padRow(arr []string, padding int) []string {
 	if len(arr) < 1 {
 		return arr
 	}
 	padded := make([]string, len(arr))
-	for index, el := range arr {
-		b := createBuffer()
+	for i, el := range arr {
+		b := newWriteBuffer()
 		b.Write(" ", padding)
 		b.Write(el, 1)
 		b.Write(" ", padding)
-		padded[index] = b.String()
+		padded[i] = b.String()
 	}
 	return padded
 }
 
-// Align right (Add padding left)
+// padLeft right-aligns text by adding padding on the left.
 func (t *Tabulate) padLeft(width int, str string) string {
-	b := createBuffer()
+	b := newWriteBuffer()
 	b.Write(" ", (width - runewidth.StringWidth(str)))
 	b.Write(str, 1)
 	return b.String()
 }
 
-// Align Left (Add padding right)
+// padRight left-aligns text by adding padding on the right.
 func (t *Tabulate) padRight(width int, str string) string {
-	b := createBuffer()
+	b := newWriteBuffer()
 	b.Write(str, 1)
 	b.Write(" ", (width - runewidth.StringWidth(str)))
 	return b.String()
 }
 
-// Center the element in the cell
+// padCenter centers text in a cell by adding padding on both sides.
 func (t *Tabulate) padCenter(width int, str string) string {
-	b := createBuffer()
-	padding := int(math.Ceil(float64((width - runewidth.StringWidth(str))) / 2.0))
+	b := newWriteBuffer()
+	strWidth := runewidth.StringWidth(str)
+	padding := int(math.Ceil(float64((width - strWidth)) / 2.0))
 	b.Write(" ", padding)
 	b.Write(str, 1)
 	b.Write(" ", (width - runewidth.StringWidth(b.String())))
-
 	return b.String()
 }
 
-// Build Line based on padded_widths from t.GetWidths()
-func (t *Tabulate) buildLine(padded_widths []int, padding []int, l Line) string {
-	cells := make([]string, len(padded_widths))
+// buildLine builds a horizontal line based on column widths.
+func (t *Tabulate) buildLine(paddedWidths []int, padding []int, l Line) string {
+	cells := make([]string, len(paddedWidths))
 
-	for i, _ := range cells {
-		b := createBuffer()
-		b.Write(l.hline, padding[i]+MIN_PADDING)
+	for i := range cells {
+		b := newWriteBuffer()
+		b.Write(l.hline, padding[i]+minPadding)
 		cells[i] = b.String()
 	}
 
@@ -429,22 +404,22 @@ func (t *Tabulate) SetIndex(index bool) {
 	t.Index = index
 }
 
-// Build Row based on padded_widths from t.GetWidths()
-func (t *Tabulate) buildRow(elements []string, padded_widths []int, paddings []int, d Row) string {
+// buildRow builds a formatted row based on column widths.
+func (t *Tabulate) buildRow(elements []string, paddedWidths []int, paddings []int, d Row) string {
 
 	var buffer bytes.Buffer
 	buffer.WriteString(d.begin)
 	padFunc := t.getAlignFunc()
 	// Print contents
-	for i := 0; i < len(padded_widths); i++ {
+	for i := 0; i < len(paddedWidths); i++ {
 		output := ""
 		if len(elements) <= i || (len(elements) > i && elements[i] == " nil ") {
-			output = padFunc(padded_widths[i], t.EmptyVar)
+			output = padFunc(paddedWidths[i], t.EmptyVar)
 		} else if len(elements) > i {
-			output = padFunc(padded_widths[i], elements[i])
+			output = padFunc(paddedWidths[i], elements[i])
 		}
 		buffer.WriteString(output)
-		if i != len(padded_widths)-1 {
+		if i != len(paddedWidths)-1 {
 			buffer.WriteString(d.sep)
 		}
 	}
@@ -453,9 +428,27 @@ func (t *Tabulate) buildRow(elements []string, padded_widths []int, paddings []i
 	return buffer.String()
 }
 
-// Render the data table
+// Render formats the data table using the specified format.
+// If no format is provided, uses the TableFormat set in the Tabulate struct.
+// For HTML format, uses the HTMLConfig for customization.
 func (t *Tabulate) Render(format ...interface{}) string {
 	var lines []string
+
+	// Determine the format
+	formatStr := ""
+	if len(format) > 0 {
+		if fs, ok := format[0].(string); ok {
+			formatStr = fs
+		}
+	}
+
+	// Special handling for HTML format - use modern renderHTMLTable
+	if formatStr == "html" || formatStr == "html-nohead" {
+		if formatStr == "html-nohead" {
+			t.NoHeader = true
+		}
+		return t.renderHTMLTable(t.HTMLConfig)
+	}
 
 	// If headers are set use them, otherwise pop the first row
 	if len(t.Headers) < 1 {
@@ -468,8 +461,10 @@ func (t *Tabulate) Render(format ...interface{}) string {
 
 	// Use the format that was passed as parameter, otherwise
 	// use the format defined in the struct
-	if len(format) > 0 {
-		t.TableFormat = TableFormats[format[0].(string)]
+	if formatStr != "" {
+		if tableFormat, exists := TableFormats[formatStr]; exists {
+			t.TableFormat = tableFormat
+		}
 	}
 
 	// If Wrap Strings is set to True,then break up the string to multiple cells
@@ -485,51 +480,50 @@ func (t *Tabulate) Render(format ...interface{}) string {
 	// Get Column widths for all columns
 	cols := t.getWidths(t.Headers, t.Data)
 
-	padded_widths := make([]int, len(cols))
-	for i, _ := range padded_widths {
-		padded_widths[i] = cols[i] + MIN_PADDING*t.TableFormat.Padding
+	paddedWidths := make([]int, len(cols))
+	for i := range paddedWidths {
+		paddedWidths[i] = cols[i] + minPadding*t.TableFormat.Padding
 	}
 
 	// Start appending lines
 
 	// Append top line if not hidden
 	if !inSlice("top", t.HideLines) {
-		lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineTop))
+		lines = append(lines, t.buildLine(paddedWidths, cols, t.TableFormat.LineTop))
 	}
 
-	if t.NoHeader != true {
+	if !t.NoHeader {
 		// Add Header
 		if len(t.Headers) < len(t.Data[0].Elements) {
 			diff := len(t.Data[0].Elements) - len(t.Headers)
-			padded_header := make([]string, diff)
+			paddedHeader := make([]string, diff)
 			for _, e := range t.Headers {
-				padded_header = append(padded_header, e)
+				paddedHeader = append(paddedHeader, e)
 			}
-			t.Headers = padded_header
+			t.Headers = paddedHeader
 		}
-		lines = append(lines, t.buildRow(t.padRow(t.Headers, t.TableFormat.Padding), padded_widths, cols, t.TableFormat.HeaderRow))
+		lines = append(lines, t.buildRow(t.padRow(t.Headers, t.TableFormat.Padding), paddedWidths, cols, t.TableFormat.HeaderRow))
 
 		// Add Line Below Header if not hidden
 		if !inSlice("belowheader", t.HideLines) {
-			lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineBelowHeader))
+			lines = append(lines, t.buildLine(paddedWidths, cols, t.TableFormat.LineBelowHeader))
 		}
 	}
 
 	// Add Data Rows
 	for index, element := range t.Data {
-		lines = append(lines, t.buildRow(t.padRow(element.Elements, t.TableFormat.Padding), padded_widths, cols, t.TableFormat.DataRow))
+		lines = append(lines, t.buildRow(t.padRow(element.Elements, t.TableFormat.Padding), paddedWidths, cols, t.TableFormat.DataRow))
 		if index < len(t.Data)-1 {
-			if element.Continuos != true {
-				if t.RemEmptyLines != true {
-					lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineBetweenRows))
-
+			if !element.Continuous {
+				if !t.RemEmptyLines {
+					lines = append(lines, t.buildLine(paddedWidths, cols, t.TableFormat.LineBetweenRows))
 				}
 			}
 		}
 	}
 
 	if !inSlice("bottomLine", t.HideLines) {
-		lines = append(lines, t.buildLine(padded_widths, cols, t.TableFormat.LineBottom))
+		lines = append(lines, t.buildLine(paddedWidths, cols, t.TableFormat.LineBottom))
 	}
 
 	// Join lines
@@ -633,19 +627,19 @@ func (t *Tabulate) wrapCellData() []*TabulateRow {
 	next := t.Data[0]
 	for index := 0; index <= len(t.Data); index++ {
 		elements := next.Elements
-		new_elements := make([]string, len(elements))
+		newElements := make([]string, len(elements))
 
 		for i, e := range elements {
 			if runewidth.StringWidth(e) > t.MaxSize {
 				elements[i] = runewidth.Truncate(e, t.MaxSize, "")
-				new_elements[i] = e[len(elements[i]):]
-				next.Continuos = true
+				newElements[i] = e[len(elements[i]):]
+				next.Continuous = true
 			}
 		}
 
-		if next.Continuos {
+		if next.Continuous {
 			arr = append(arr, next)
-			next = &TabulateRow{Elements: new_elements}
+			next = &TabulateRow{Elements: newElements}
 			index--
 		} else if index+1 < len(t.Data) {
 			arr = append(arr, next)
@@ -658,39 +652,127 @@ func (t *Tabulate) wrapCellData() []*TabulateRow {
 	return arr
 }
 
-// Create a new Tabulate Object
-// Accepts 2D String Array, 2D Int Array, 2D Int64 Array,
-// 2D Bool Array, 2D Float64 Array, 2D interface{} Array,
-// Map map[strig]string, Map map[string]interface{},
+// Create creates a new Tabulate object from various data types.
+// Accepts:
+//   - 2D String Array ([][]string)
+//   - 2D Int Array ([][]int)
+//   - 2D Int32 Array ([][]int32)
+//   - 2D Int64 Array ([][]int64)
+//   - 2D Bool Array ([][]bool)
+//   - 2D Float64 Array ([][]float64)
+//   - 2D Interface Array ([][]interface{})
+//   - 1D String Array ([]string)
+//   - 1D Interface Array ([]interface{})
+//   - Map[string][]interface{}
+//   - Map[string][]string
 func Create(data interface{}) *Tabulate {
-	t := &Tabulate{FloatFormat: 'f', MaxSize: 30}
+	t := &Tabulate{
+		FloatFormat: 'f',
+		MaxSize:     30,
+		TableFormat: TableFormats["simple"],
+		Align:       "right",
+		HTMLConfig:  DefaultHTMLConfig(),
+	}
 
 	switch v := data.(type) {
 	case [][]string:
-		t.Data = createFromString(data.([][]string))
+		t.Data = createFromString(v)
 	case [][]int32:
-		t.Data = createFromInt32(data.([][]int32))
+		t.Data = createFromInt32(v)
 	case [][]int64:
-		t.Data = createFromInt64(data.([][]int64))
+		t.Data = createFromInt64(v)
 	case [][]int:
-		t.Data = createFromInt(data.([][]int))
+		t.Data = createFromInt(v)
 	case [][]bool:
-		t.Data = createFromBool(data.([][]bool))
+		t.Data = createFromBool(v)
 	case [][]float64:
-		t.Data = createFromFloat64(data.([][]float64), t.FloatFormat)
+		t.Data = createFromFloat64(v, t.FloatFormat)
 	case [][]interface{}:
-		t.Data = createFromMixed(data.([][]interface{}), t.FloatFormat)
+		t.Data = createFromMixed(v, t.FloatFormat)
 	case []string:
-		t.Data = createFromString([][]string{data.([]string)})
+		t.Data = createFromString([][]string{v})
 	case []interface{}:
-		t.Data = createFromMixed([][]interface{}{data.([]interface{})}, t.FloatFormat)
+		t.Data = createFromMixed([][]interface{}{v}, t.FloatFormat)
 	case map[string][]interface{}:
-		t.Headers, t.Data = createFromMapMixed(data.(map[string][]interface{}), t.FloatFormat)
+		t.Headers, t.Data = createFromMapMixed(v, t.FloatFormat)
 	case map[string][]string:
-		t.Headers, t.Data = createFromMapString(data.(map[string][]string))
-	default:
-		fmt.Println(v)
+		t.Headers, t.Data = createFromMapString(v)
 	}
 
 	return t
+}
+
+// SetHTMLConfig sets a custom HTML configuration for table rendering.
+func (t *Tabulate) SetHTMLConfig(config HTMLConfig) {
+	t.HTMLConfig = config
+}
+
+// SetHTMLStyle is a convenience method to set the HTML table class for styling.
+func (t *Tabulate) SetHTMLStyle(tableClass string) {
+	t.HTMLConfig.TableClass = tableClass
+}
+
+// SetHTMLBootstrap sets the Bootstrap version (4, 5, or empty for none).
+func (t *Tabulate) SetHTMLBootstrap(version string) {
+	t.HTMLConfig.BootstrapVersion = version
+	if version == "5" {
+		t.HTMLConfig.TableClass = "table table-striped table-hover"
+	} else if version == "4" {
+		t.HTMLConfig.TableClass = "table table-striped table-hover"
+	}
+}
+
+// SetHTMLTitle sets an optional title for the HTML table.
+func (t *Tabulate) SetHTMLTitle(title string) {
+	t.HTMLConfig.Title = title
+}
+
+// SetHTMLCustomCSS adds custom CSS to the HTML output.
+func (t *Tabulate) SetHTMLCustomCSS(css string) {
+	t.HTMLConfig.CustomCSS = css
+}
+
+// SetHTMLMinimal uses minimal CSS styling without Bootstrap.
+func (t *Tabulate) SetHTMLMinimal() {
+	t.HTMLConfig = MinimalHTMLConfig()
+}
+
+// SetHTMLOfflineMode enables offline mode with fully embedded Bootstrap CSS.
+//
+// By default, HTML generation uses CDN links for smaller file sizes (~2KB).
+// Call SetHTMLOfflineMode to embed the complete Bootstrap 5 CSS directly
+// in the HTML file for use on systems without internet access.
+//
+// The resulting HTML file will be self-contained and larger (~100KB),
+// but can be opened and viewed in any browser regardless of internet connectivity.
+//
+// This is useful for:
+//   - Generating reports on backend servers without internet access
+//   - Creating portable HTML documents for email or file sharing
+//   - Archiving HTML reports that must work indefinitely
+//   - Serving tables in offline or air-gapped environments
+//
+// Example:
+//
+//	table := gotabulate.Create(data)
+//	table.SetHeaders([]string{"Name", "Value"})
+//	table.SetHTMLOfflineMode()
+//	html := table.Render("html")
+func (t *Tabulate) SetHTMLOfflineMode() {
+	t.HTMLConfig = OfflineHTMLConfig()
+}
+
+// SetHTMLUseCDN configures whether Bootstrap CSS is loaded from CDN or embedded.
+//
+// By default (true), Bootstrap is loaded from a CDN for smaller file sizes (~2KB).
+// When set to false, the complete Bootstrap 5 CSS is embedded in the HTML (~100KB),
+// making the file completely self-contained and usable without internet.
+//
+// Parameters:
+//   - useCDN: true to use CDN (default, smaller files, requires internet)
+//   - useCDN: false to embed CSS (larger files, works offline)
+//
+// See SetHTMLOfflineMode for a convenience method to enable offline mode.
+func (t *Tabulate) SetHTMLUseCDN(useCDN bool) {
+	t.HTMLConfig.UseBootstrapCDN = useCDN
 }

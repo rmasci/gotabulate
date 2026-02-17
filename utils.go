@@ -5,137 +5,143 @@ import (
 	"strconv"
 )
 
-// Create normalized Array from strings
+// createFromString creates normalized rows from a string slice.
 func createFromString(data [][]string) []*TabulateRow {
 	rows := make([]*TabulateRow, len(data))
 
-	for index, el := range data {
-		rows[index] = &TabulateRow{Elements: el}
+	for i, row := range data {
+		rows[i] = &TabulateRow{Elements: row}
 	}
 	return rows
 }
 
-// Create normalized array of rows from mixed data (interface{})
+// createFromMixed creates normalized rows from mixed interface{} data.
 func createFromMixed(data [][]interface{}, format byte) []*TabulateRow {
 	rows := make([]*TabulateRow, len(data))
-	for index_1, element := range data {
+	for i, element := range data {
 		normalized := make([]string, len(element))
-		for index, el := range element {
-			switch el.(type) {
-			case int32:
-				quoted := strconv.QuoteRuneToASCII(el.(int32))
-				normalized[index] = quoted[1 : len(quoted)-1]
-			case int:
-				normalized[index] = strconv.Itoa(el.(int))
-			case int64:
-				normalized[index] = strconv.FormatInt(el.(int64), 10)
-			case bool:
-				normalized[index] = strconv.FormatBool(el.(bool))
-			case float64:
-				normalized[index] = strconv.FormatFloat(el.(float64), format, -1, 64)
-			case uint64:
-				normalized[index] = strconv.FormatUint(el.(uint64), 10)
-			case nil:
-				normalized[index] = "nil"
-			default:
-				normalized[index] = fmt.Sprintf("%s", el)
-			}
+		for j, el := range element {
+			normalized[j] = formatValue(el, format)
 		}
-		rows[index_1] = &TabulateRow{Elements: normalized}
+		rows[i] = &TabulateRow{Elements: normalized}
 	}
 	return rows
 }
 
-// Create normalized array from ints
+// formatValue converts a value to a string based on its type.
+func formatValue(el interface{}, format byte) string {
+	switch v := el.(type) {
+	case int32:
+		quoted := strconv.QuoteRuneToASCII(v)
+		return quoted[1 : len(quoted)-1]
+	case int:
+		return strconv.Itoa(v)
+	case int64:
+		return strconv.FormatInt(v, 10)
+	case bool:
+		return strconv.FormatBool(v)
+	case float64:
+		return strconv.FormatFloat(v, format, -1, 64)
+	case uint64:
+		return strconv.FormatUint(v, 10)
+	case nil:
+		return "nil"
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
+
+// createFromInt creates normalized rows from int data.
 func createFromInt(data [][]int) []*TabulateRow {
 	rows := make([]*TabulateRow, len(data))
-	for index_1, arr := range data {
-		row := make([]string, len(arr))
-		for index, el := range arr {
-			row[index] = strconv.Itoa(el)
+	for i, row := range data {
+		normalized := make([]string, len(row))
+		for j, val := range row {
+			normalized[j] = strconv.Itoa(val)
 		}
-		rows[index_1] = &TabulateRow{Elements: row}
+		rows[i] = &TabulateRow{Elements: normalized}
 	}
 	return rows
 }
 
-// Create normalized array from float64
+// createFromFloat64 creates normalized rows from float64 data.
 func createFromFloat64(data [][]float64, format byte) []*TabulateRow {
 	rows := make([]*TabulateRow, len(data))
-	for index_1, arr := range data {
-		row := make([]string, len(arr))
-		for index, el := range arr {
-			row[index] = strconv.FormatFloat(el, format, -1, 64)
+	for i, row := range data {
+		normalized := make([]string, len(row))
+		for j, val := range row {
+			normalized[j] = strconv.FormatFloat(val, format, -1, 64)
 		}
-		rows[index_1] = &TabulateRow{Elements: row}
+		rows[i] = &TabulateRow{Elements: normalized}
 	}
 	return rows
 }
 
-// Create normalized array from ints32
+// createFromInt32 creates normalized rows from int32 data.
 func createFromInt32(data [][]int32) []*TabulateRow {
 	rows := make([]*TabulateRow, len(data))
-	for index_1, arr := range data {
-		row := make([]string, len(arr))
-		for index, el := range arr {
-			quoted := strconv.QuoteRuneToASCII(el)
-			row[index] = quoted[1 : len(quoted)-1]
+	for i, row := range data {
+		normalized := make([]string, len(row))
+		for j, val := range row {
+			quoted := strconv.QuoteRuneToASCII(val)
+			normalized[j] = quoted[1 : len(quoted)-1]
 		}
-		rows[index_1] = &TabulateRow{Elements: row}
+		rows[i] = &TabulateRow{Elements: normalized}
 	}
 	return rows
 }
 
-// Create normalized array from ints64
+// createFromInt64 creates normalized rows from int64 data.
 func createFromInt64(data [][]int64) []*TabulateRow {
 	rows := make([]*TabulateRow, len(data))
-	for index_1, arr := range data {
-		row := make([]string, len(arr))
-		for index, el := range arr {
-			row[index] = strconv.FormatInt(el, 10)
+	for i, row := range data {
+		normalized := make([]string, len(row))
+		for j, val := range row {
+			normalized[j] = strconv.FormatInt(val, 10)
 		}
-		rows[index_1] = &TabulateRow{Elements: row}
+		rows[i] = &TabulateRow{Elements: normalized}
 	}
 	return rows
 }
 
-// Create normalized array from bools
+// createFromBool creates normalized rows from bool data.
 func createFromBool(data [][]bool) []*TabulateRow {
 	rows := make([]*TabulateRow, len(data))
-	for index_1, arr := range data {
-		row := make([]string, len(arr))
-		for index, el := range arr {
-			row[index] = strconv.FormatBool(el)
+	for i, row := range data {
+		normalized := make([]string, len(row))
+		for j, val := range row {
+			normalized[j] = strconv.FormatBool(val)
 		}
-		rows[index_1] = &TabulateRow{Elements: row}
+		rows[i] = &TabulateRow{Elements: normalized}
 	}
 	return rows
 }
 
-// Create normalized array from a map of mixed elements (interface{})
-// Keys will be used as header
-func createFromMapMixed(data map[string][]interface{}, format byte) (headers []string, tData []*TabulateRow) {
-
-	var dataslice [][]interface{}
+// createFromMapMixed creates normalized rows from a map of mixed elements.
+// Map keys will be used as headers.
+func createFromMapMixed(data map[string][]interface{}, format byte) ([]string, []*TabulateRow) {
+	var headers []string
+	var dataSlice [][]interface{}
 	for key, value := range data {
 		headers = append(headers, key)
-		dataslice = append(dataslice, value)
+		dataSlice = append(dataSlice, value)
 	}
-	return headers, createFromMixed(dataslice, format)
+	return headers, createFromMixed(dataSlice, format)
 }
 
-// Create normalized array from Map of strings
-// Keys will be used as header
-func createFromMapString(data map[string][]string) (headers []string, tData []*TabulateRow) {
-	var dataslice [][]string
+// createFromMapString creates normalized rows from a map of strings.
+// Map keys will be used as headers.
+func createFromMapString(data map[string][]string) ([]string, []*TabulateRow) {
+	var headers []string
+	var dataSlice [][]string
 	for key, value := range data {
 		headers = append(headers, key)
-		dataslice = append(dataslice, value)
+		dataSlice = append(dataSlice, value)
 	}
-	return headers, createFromString(dataslice)
+	return headers, createFromString(dataSlice)
 }
 
-// Check if element is present in a slice.
+// inSlice checks if an element exists in a string slice.
 func inSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
