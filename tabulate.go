@@ -516,7 +516,10 @@ func (t *Tabulate) Render(format ...interface{}) string {
 		if index < len(t.Data)-1 {
 			if !element.Continuous {
 				if !t.RemEmptyLines {
-					lines = append(lines, t.buildLine(paddedWidths, cols, t.TableFormat.LineBetweenRows))
+					line := t.buildLine(paddedWidths, cols, t.TableFormat.LineBetweenRows)
+					if line != "" {
+						lines = append(lines, line)
+					}
 				}
 			}
 		}
